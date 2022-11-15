@@ -1,10 +1,12 @@
 import gzip
-from os import mkdir
-from urllib import request
-
-from pandas import read_csv
-
+from os import mkdir,rmdir
+import json
+from pandas import read_csv,DataFrame
+from time import sleep
 import main
+import wget
+
+
 
 # Cria a pasta temp para colocarmos os arquivos CSV da COVID
 
@@ -12,11 +14,25 @@ def CreateTemp():
     mkdir('temp')
     main.log.append('Create Temp Archive /n')
 
-def DeathsArchive():
-    request('https://data.brasil.io/dataset/covid19/obito_cartorio.csv.gz','temp/obito.csv.gz')
-    # Arrumar
-    with gzip.open('obito.csv.gz', 'rb') as f:
-        file_content = f.read()
-        arquivo = open('temp/death.csv', 'w+',)
+# Elimina a pasta temp quando terminamos os processos 
+def EliminateTemp():
+    rmdir('temp/')
+    main.log.append('Eliminate Temp Archive')
 
-        arquivo.write(str(read_csv('temp/death.csv')))
+# Cuida do arquivo DeathCSV e descompacta
+def DeathArquive():
+    with open('url.json',encoding="utf-8") as f:
+        dados = json.loads(f)
+    
+    fetch = wget.download(dados["CasoCSV"],"temp/caso.csv.gz")
+    with gzip.open("temp/caso.csv.gz") as unzip:
+        archive = open("temp/caso.csv").write(unzip)
+
+    readCSV = str(read_csv(archive))
+    print("em 10 segundos aparecera os dados")
+    if readCSV == "":
+        print("No Content in File")
+    else:
+        sleep(10)
+        print(DataFrame(readCSV))
+    
